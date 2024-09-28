@@ -51,5 +51,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Aviary.sln"
+    "dotnet.defaultSolution": "Aviary.sln",
+    "FSharp.suggestGitignore": false
 }
