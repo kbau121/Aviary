@@ -428,6 +428,7 @@ MonoBehaviour:
   m_cohesionDistance: 10
   m_alignmentDistance: 10
   m_seperationDistance: 2.5
+  m_orbitDistance: 7.5
   targetCenter: {fileID: 1684983172}
 --- !u!1 &1219715618
 GameObject:
