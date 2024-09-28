@@ -11,6 +11,7 @@ namespace Aviary
         public ExampleCharacterCamera OrbitCamera;
         public Transform CameraFollowPoint;
         public CharacterController Character;
+        public BoidController BoidController;
 
         private const string MouseXInput = "Mouse X";
         private const string MouseYInput = "Mouse Y";
@@ -83,16 +84,30 @@ namespace Aviary
             characterInputs.MoveAxisRight = Input.GetAxisRaw(HorizontalInput);
             characterInputs.CameraRotation = OrbitCamera.Transform.rotation;
             characterInputs.JumpDown = Input.GetKeyDown(KeyCode.Space);
+            characterInputs.FireDown = Input.GetMouseButtonDown(0);
 
-            // Apply inputs to character
+            // Apply movement inputs to character
             Character.SetInputs(ref characterInputs);
 
-            // Apply impulse
-            if(Input.GetKeyDown(KeyCode.Q))
-            {
-                Character.Motor.ForceUnground(0.1f);
-                Character.AddVelocity(Vector3.one * 10f);
-            }
+            // Apply fire inputs
+            HandleFire(ref characterInputs);
+        }
+
+        private void HandleFire(ref PlayerCharacterInputs characterInputs)
+        {
+            if (!characterInputs.FireDown) return;
+            characterInputs.FireDown = false;
+
+            Ray ray = new Ray(Character.transform.position, OrbitCamera.transform.forward);
+            RaycastHit sphereCastHit;
+            if (!Physics.SphereCast(ray, 0.5f, out sphereCastHit, 25f, LayerMask.GetMask("Holdable"))) return;
+
+            RaycastHit raycastHit;
+            if (!Physics.Raycast(Character.transform.position, sphereCastHit.point - Character.transform.position, out raycastHit, 25f)) return;
+
+            if (sphereCastHit.colliderInstanceID != raycastHit.colliderInstanceID) return;
+
+            Debug.Log("HIT");
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Aviary
         public float MoveAxisRight;
         public Quaternion CameraRotation;
         public bool JumpDown;
+        public bool FireDown;
     }
 
     public class CharacterController : MonoBehaviour, ICharacterController
@@ -39,6 +40,7 @@ namespace Aviary
         [Header("Misc")]
         public Vector3 Gravity = new Vector3(0, -30f, 0);
         public Transform MeshRoot;
+        public BoidController BoidController;
 
         private Vector3 _moveInputVector;
         private Vector3 _lookInputVector;

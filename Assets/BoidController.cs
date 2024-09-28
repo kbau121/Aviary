@@ -23,12 +23,15 @@ public class BoidController : MonoBehaviour
     private List<GameObject> m_boids;
     private List<Vector3> m_velocities;
 
+    private List<GameObject> m_deployedBoids;
+
     private void Start()
     {
         m_boids = new List<GameObject>();
         m_velocities = new List<Vector3>();
+        m_deployedBoids = new List<GameObject>();
 
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 20; ++i)
         {
             m_boids.Add(Instantiate(m_boidObject));
             m_velocities.Add(Vector3.zero);
@@ -114,7 +117,6 @@ public class BoidController : MonoBehaviour
             Vector3 targetDelta = Vector3.zero;
             Vector3 targetOffset = targetCenter.position - m_boids[i].transform.position;
             Vector3 target = new Vector3(-targetOffset.x, 0f, -targetOffset.z).normalized * m_orbitDistance;
-            //target += new Vector3(targetCenter.position.x, m_boids[i].transform.position.y, targetCenter.position.z);
             target += targetCenter.position;
             targetDelta += (target - m_boids[i].transform.position).normalized * m_target;
 
@@ -123,9 +125,36 @@ public class BoidController : MonoBehaviour
             rotateDelta += Vector3.Cross(targetOffset, Vector3.up).normalized * m_rotate;
 
             m_velocities[i] += cohesionDelta + alignmentDelta + seperationDelta + targetDelta + rotateDelta;
-            //m_velocities[i] += targetDelta;
             float velMag = m_velocities[i].magnitude;
             m_velocities[i] = m_velocities[i].normalized * Mathf.Min(velMag, 15f);
         }
+    }
+
+    public enum BoidActionType
+    {
+        Carry
+    }
+
+    public struct BoidAction
+    {
+        BoidActionType action;
+        Transform targetTransform;
+        Rigidbody targetRigidbody;
+        Vector3 offset;
+        int workCount;
+
+        public BoidAction(int boidIndex, Transform targetTransform, Rigidbody targetRigidbody, Vector3 offset, int workCount)
+        {
+            action = BoidActionType.Carry;
+            this.targetTransform = targetTransform;
+            this.targetRigidbody = targetRigidbody;
+            this.offset = offset;
+            this.workCount = workCount;
+        }
+    }
+
+    public void DeployBoid(BoidAction action)
+    {
+
     }
 }
