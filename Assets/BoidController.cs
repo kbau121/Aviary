@@ -11,10 +11,12 @@ public class BoidController : MonoBehaviour
     public float m_alignment = 1f;
     public float m_seperation = 1f;
     public float m_target = 1f;
+    public float m_rotate = 1f;
 
     public float m_cohesionDistance = 10f;
     public float m_alignmentDistance = 10f;
     public float m_seperationDistance = 2.5f;
+    public float m_orbitDistance = 10f;
 
     public Transform targetCenter;
 
@@ -83,7 +85,13 @@ public class BoidController : MonoBehaviour
             if (alignmentBoids > 0)
             {
                 avgVel /= alignmentBoids;
-                alignmentDelta += (avgVel - m_velocities[i]).normalized * m_alignment;
+                float magnitude = (avgVel - m_velocities[i]).magnitude;
+
+                if (magnitude > 0f)
+                {
+                    magnitude = Mathf.Max(0.1f, magnitude);
+                    alignmentDelta += (avgVel - m_velocities[i]) / magnitude * m_alignment;
+                }
             }
 
             // Seperation
@@ -94,16 +102,30 @@ public class BoidController : MonoBehaviour
                 if (i == k) continue;
                 if (Vector3.Distance(m_boids[k].transform.position, m_boids[i].transform.position) > m_seperationDistance) continue;
 
-                cummulativeOffset += m_boids[i].transform.position - m_boids[k].transform.position;
+                float magnitude = (m_boids[i].transform.position - m_boids[k].transform.position).magnitude;
+                if (magnitude > 0)
+                {
+                    cummulativeOffset += (m_boids[i].transform.position - m_boids[k].transform.position) / (magnitude * magnitude);
+                }
             }
-            seperationDelta += cummulativeOffset.normalized * m_seperation;
+            seperationDelta += cummulativeOffset * m_seperation;
 
             // Target
             Vector3 targetDelta = Vector3.zero;
-            Vector3 targetOffset = (targetCenter.position - m_boids[i].transform.position).normalized;
-            targetDelta = targetOffset * m_target;
+            Vector3 targetOffset = targetCenter.position - m_boids[i].transform.position;
+            Vector3 target = new Vector3(-targetOffset.x, 0f, -targetOffset.z).normalized * m_orbitDistance;
+            //target += new Vector3(targetCenter.position.x, m_boids[i].transform.position.y, targetCenter.position.z);
+            target += targetCenter.position;
+            targetDelta += (target - m_boids[i].transform.position).normalized * m_target;
 
-            m_velocities[i] += cohesionDelta + alignmentDelta + seperationDelta + targetDelta;
+            // Rotate
+            Vector3 rotateDelta = Vector3.zero;
+            rotateDelta += Vector3.Cross(targetOffset, Vector3.up).normalized * m_rotate;
+
+            m_velocities[i] += cohesionDelta + alignmentDelta + seperationDelta + targetDelta + rotateDelta;
+            //m_velocities[i] += targetDelta;
+            float velMag = m_velocities[i].magnitude;
+            m_velocities[i] = m_velocities[i].normalized * Mathf.Min(velMag, 15f);
         }
     }
 }
